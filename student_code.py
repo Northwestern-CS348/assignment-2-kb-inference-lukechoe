@@ -128,6 +128,47 @@ class KnowledgeBase(object):
         printv("Retracting {!r}", 0, verbose, [fact_or_rule])
         ####################################################
         # Student code goes here
+
+        if isinstance(fact_or_rule, Fact):
+            if fact_or_rule not in self.facts:
+                print("No fact found")
+            else:
+                ind = self.facts.index(fact_or_rule)
+                f = self.facts[ind]
+                # deal with the facts/rules that support the retracted fact
+                #if it is an asserted fact then delete
+                if len(self.facts[ind].supported_by) == 0:
+                    del self.facts[ind]
+                #else, check all previous facts/rules and remove the support
+                else:
+                    for ff in f.supported_by:
+                        # do i have to search through all of the list elements or can
+                        # i just access a fact via the supported_by list 
+                        ind = self.facts.index(ff)
+                        if ind > 0:
+                            self.facts[ind].supports_facts.remove(ff)
+                        else:
+                            print("error finding supported by fact")
+
+                #now time to check what the retracted fact supports
+                for thing in f.supports_facts:
+                    print(thing.supported_by, 'wwwwwwwwwwwwwwwwwwww\n')
+                    thing.supported_by.remove(f)
+                    if len(thing.supported_by) == 0:
+                        #self.kb_retract(thing)
+
+                        self.facts.remove(thing)
+
+
+
+                #supported_facts = f.supports_facts
+                #supported_rules = f.supports_rules
+                #for fact in supported_facts:
+                #   ind = self.facts.index(fact)
+                #    ff = self.facts[ind]
+
+
+
         
 
 class InferenceEngine(object):
@@ -146,3 +187,33 @@ class InferenceEngine(object):
             [fact.statement, rule.lhs, rule.rhs])
         ####################################################
         # Student code goes here
+
+        binding = match(fact.statement, rule.lhs[0])
+            
+        if binding and len(rule.lhs) == 1:
+            s = instantiate(rule.rhs, binding)
+            # when do i construct fact with [fact,rule] vs [fact]???????????
+            f = Fact(s, [fact])
+
+            kb.kb_assert(f)
+            fact.supports_facts.append(f)
+
+
+        elif binding and len(rule.lhs) > 1: 
+            s_r = instantiate(rule.rhs, binding)
+            
+            lhs_statements = []
+            for i in rule.lhs:
+                lhs_statements.append(instantiate(i, binding))
+
+            del lhs_statements[0] 
+
+            
+            new_rule = Rule([lhs_statements, s_r], [fact, rule])
+            
+            kb.kb_assert(new_rule)
+            rule.supports_rules.append(new_rule)
+
+
+
+

@@ -14,13 +14,15 @@ class KBTest(unittest.TestCase):
         for item in data:
             if isinstance(item, Fact) or isinstance(item, Rule):
                 self.KB.kb_assert(item)
-        
+
+                
     def test1(self):
         # Did the student code contain syntax errors, AttributeError, etc.
         ask1 = read.parse_input("fact: (motherof ada ?X)")
         print(' Asking if', ask1)
         answer = self.KB.kb_ask(ask1)
         self.assertEqual(str(answer[0]), "?X : bing")
+        
 
     def test2(self):
         # Can fc_infer actually infer
@@ -29,17 +31,30 @@ class KBTest(unittest.TestCase):
         answer = self.KB.kb_ask(ask1)
         self.assertEqual(str(answer[0]), "?X : felix")
         self.assertEqual(str(answer[1]), "?X : chen")
+    """
+        for fact in self.KB.facts:
+            print('-----------------------')
+            print(fact.statement)
+            
+        for rule in self.KB.rules:
+            print('....................')
+            print(rule.lhs[0], '------ ' , rule.rhs, '-------', rule.supported_by)
+    """
+
 
     def test3(self):
         # Does retract actually retract things 
         r1 = read.parse_input("fact: (motherof ada bing)")
+
         print(' Retracting', r1)
         self.KB.kb_retract(r1)
+
         ask1 = read.parse_input("fact: (grandmotherof ada ?X)")
         print(' Asking if', ask1)
         answer = self.KB.kb_ask(ask1)
         self.assertEqual(len(answer), 1)
         self.assertEqual(str(answer[0]), "?X : felix")
+
 
     def test4(self):
         # makes sure retract does not retract supported fact
