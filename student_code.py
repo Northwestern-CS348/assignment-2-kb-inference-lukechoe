@@ -116,6 +116,8 @@ class KnowledgeBase(object):
             print("Invalid ask:", fact.statement)
             return []
 
+            # Make sure to write edge case that if the retracted fact 
+            # is supported by something -  exit?
     def kb_retract(self, fact_or_rule):
         """Retract a fact from the KB
 
@@ -125,49 +127,82 @@ class KnowledgeBase(object):
         Returns:
             None
         """
+
+
+
         printv("Retracting {!r}", 0, verbose, [fact_or_rule])
         ####################################################
         # Student code goes here
 
-        if isinstance(fact_or_rule, Fact):
-            if fact_or_rule not in self.facts:
-                print("No fact found")
-            else:
-                ind = self.facts.index(fact_or_rule)
-                f = self.facts[ind]
-                # deal with the facts/rules that support the retracted fact
-                #if it is an asserted fact then delete
-                if len(self.facts[ind].supported_by) == 0:
-                    del self.facts[ind]
-                #else, check all previous facts/rules and remove the support
-                else:
-                    for ff in f.supported_by:
-                        # do i have to search through all of the list elements or can
-                        # i just access a fact via the supported_by list 
-                        ind = self.facts.index(ff)
-                        if ind > 0:
-                            self.facts[ind].supports_facts.remove(ff)
-                        else:
-                            print("error finding supported by fact")
 
-                #now time to check what the retracted fact supports
-                for thing in f.supports_facts:
-                    print(thing.supported_by, 'wwwwwwwwwwwwwwwwwwww\n')
-                    thing.supported_by.remove(f)
-                    if len(thing.supported_by) == 0:
-                        #self.kb_retract(thing)
+        if fact_or_rule in self.facts:
+            ind = self.facts.index(fact_or_rule)
+            f_r = self.facts[ind]
+        elif fact_or_rule in self.rules:
+            ind = self.rules.index(fact_or_rule)
+            f_r = self.rules[ind]
+        else:
+            print("Fact/Rule not found???????")
+            return
+        
+        
+        if isinstance(f_r, Rule) and len(f_r.supported_by) == 0:
+            return
+        if len(f_r.supported_by) > 0:
+            return
 
-                        self.facts.remove(thing)
+    
+        for f in f_r.supports_facts:
+            
+            ind3 = f.supported_by.index(f_r)
+            if ind3 % 2 == 1:
+                tmp = f.supported_by[ind3-1]
+                f.supported_by.remove(tmp)
+                tmp = f.supported_by[ind3-1]
+                f.supported_by.remove(tmp)
+            elif ind3 % 2 == 0:
+                tmp = f.supported_by[ind3]
+                f.supported_by.remove(tmp)
 
+                tmp = f.supported_by[ind3]
+                f.supported_by.remove(tmp)
 
+            if len(f.supported_by) == 0:
+                ind3 = self.facts.index(f)
+                temp = self.facts[ind3]
+                #self.facts.remove(self.facts[ind3])
+                self.kb_retract(temp)
+                
+                
+                
+        
+        print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV', len(f_r.supports_rules))
+        for r in f_r.supports_rules:
+            ind3 = r.supported_by.index(f_r)
+            #print('***************************************************', r.supported_by[ind3])
+            if ind3 % 2 == 1:
+                tmp = r.supported_by[ind3-1]
+                r.supported_by.remove(tmp)
+                tmp = r.supported_by[ind3-1]
+                r.supported_by.remove(tmp)
+            elif ind3 % 2 == 0:
+                tmp = r.supported_by[ind3]
+                r.supported_by.remove(tmp)
 
-                #supported_facts = f.supports_facts
-                #supported_rules = f.supports_rules
-                #for fact in supported_facts:
-                #   ind = self.facts.index(fact)
-                #    ff = self.facts[ind]
+                tmp = r.supported_by[ind3]
+                r.supported_by.remove(tmp)
 
+            print('...')
+            if (len(r.supported_by)) == 0:
+                print('ooooooooooooooookkkkkkkkkkkkkkkkkkkay we got here')
+                ind3 = self.rules.index(r)
+                temp = self.rules[ind3]
+                self.rules.remove(self.rules[ind3])
+                self.kb_retract(temp)
+                
 
+        if isinstance(f_r, Fact) and len(f_r.supported_by) == 0:
+            del self.facts[ind]
 
         
 
@@ -188,19 +223,34 @@ class InferenceEngine(object):
         ####################################################
         # Student code goes here
 
+        # 
+
         binding = match(fact.statement, rule.lhs[0])
-            
+        
         if binding and len(rule.lhs) == 1:
             s = instantiate(rule.rhs, binding)
             # when do i construct fact with [fact,rule] vs [fact]???????????
-            f = Fact(s, [fact])
+            
+            #only call constructor if new 
+            # find "f" in self.facts.. if not in self.facts construct new 
+            # otherwise append the supports_facts and supports_rules
+            
 
+            f = Fact(s, [fact,rule])
+            #print(f.statement, '------------------------------------')
+            
             kb.kb_assert(f)
+            #print(',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,', type(f))
+
             fact.supports_facts.append(f)
+            rule.supports_facts.append(f)
+                #print('--------------\n\n', rule.supports_facts)
+                #print([fact,rule], '\n\n=++++++++++++++++++++++++++++++++++++++++++++++++')
 
 
         elif binding and len(rule.lhs) > 1: 
             s_r = instantiate(rule.rhs, binding)
+            
             
             lhs_statements = []
             for i in rule.lhs:
@@ -208,12 +258,21 @@ class InferenceEngine(object):
 
             del lhs_statements[0] 
 
-            
+            # SAME LOGIC FOR RULE, BASED ON FACT
             new_rule = Rule([lhs_statements, s_r], [fact, rule])
-            
+            """
+            if new_rule in kb.rules:
+                ind = kb.rules.index(new_rule)
+                kb.rules[ind].supported_by.append([fact,rule])
+                rule.supports_rules.append(kb.rules[ind])
+            else:
+                """
             kb.kb_assert(new_rule)
+            #print(new_rule.lhs, new_rule.rhs, '\n\n----------------------------')
+            #print('--------------------------\n', new_rule.lhs, '\n', type(new_rule) , '-------------------')
             rule.supports_rules.append(new_rule)
-
+            fact.supports_rules.append(new_rule)
+                #print('-------------\n\n' , len(rule.supports_rules))
 
 
 
