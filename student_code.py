@@ -133,8 +133,6 @@ class KnowledgeBase(object):
         printv("Retracting {!r}", 0, verbose, [fact_or_rule])
         ####################################################
         # Student code goes here
-
-        
         if fact_or_rule in self.facts:
             ind = self.facts.index(fact_or_rule)
             f_r = self.facts[ind]
@@ -144,6 +142,28 @@ class KnowledgeBase(object):
         else:
             print("Fact/Rule not found???????")
             return
+
+        if isinstance(f_r, Rule) and len(f_r.supported_by) == 0:
+            return
+        if len(f_r.supported_by) > 0:
+            return
+
+        self.kb_retract_helper(fact_or_rule)
+
+
+
+    def kb_retract_helper(self, fact_or_rule):
+
+        if fact_or_rule in self.facts:
+            ind = self.facts.index(fact_or_rule)
+            f_r = self.facts[ind]
+        elif fact_or_rule in self.rules:
+            ind = self.rules.index(fact_or_rule)
+            f_r = self.rules[ind]
+        else:
+            print("Fact/Rule not found???????")
+            return
+        
         
         """ THIS IS NECESSSAERY BUT MAYBE MAKE HELPER SO THAT IT IS
         ONLY CALLED ON THE FIRST fact_OR_rule instead of all
@@ -174,7 +194,7 @@ class KnowledgeBase(object):
                 ind3 = self.facts.index(f)
                 temp = self.facts[ind3]
                 #self.facts.remove(self.facts[ind3])
-                self.kb_retract(temp)
+                self.kb_retract_helper(temp)
                 
                 
         for r in f_r.supports_rules:
@@ -196,7 +216,7 @@ class KnowledgeBase(object):
                 ind3 = self.rules.index(r)
                 temp = self.rules[ind3]
                 #self.rules.remove(self.rules[ind3])
-                self.kb_retract(temp)
+                self.kb_retract_helper(temp)
                 
 
         if isinstance(f_r, Fact) and len(f_r.supported_by) == 0:

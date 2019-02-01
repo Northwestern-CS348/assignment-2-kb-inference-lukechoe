@@ -4,7 +4,7 @@ from logical_classes import *
 from student_code import KnowledgeBase
 
 class KBTest(unittest.TestCase):
-    
+    """
     def setUp(self):
         # Assert starter facts
         file = 'statements_kb4.txt'
@@ -226,7 +226,7 @@ class KBTest(unittest.TestCase):
         print(' Asking if', ask3)
         answer = self.KB.kb_ask(ask3)
         self.assertEqual(str(answer[0]), "?X : profHammond")
-    """
+    
 def pprint_justification(answer):
     """Pretty prints (hence pprint) justifications for the answer.
     """
