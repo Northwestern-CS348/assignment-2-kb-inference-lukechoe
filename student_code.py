@@ -174,9 +174,6 @@ class KnowledgeBase(object):
                 self.kb_retract(temp)
                 
                 
-                
-        
-        print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV', len(f_r.supports_rules))
         for r in f_r.supports_rules:
             ind3 = r.supported_by.index(f_r)
             #print('***************************************************', r.supported_by[ind3])
@@ -194,7 +191,6 @@ class KnowledgeBase(object):
 
             print('...')
             if (len(r.supported_by)) == 0:
-                print('ooooooooooooooookkkkkkkkkkkkkkkkkkkay we got here')
                 ind3 = self.rules.index(r)
                 temp = self.rules[ind3]
                 self.rules.remove(self.rules[ind3])
@@ -237,16 +233,11 @@ class InferenceEngine(object):
             
 
             f = Fact(s, [fact,rule])
-            #print(f.statement, '------------------------------------')
             
-            kb.kb_assert(f)
-            #print(',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,', type(f))
-
             fact.supports_facts.append(f)
             rule.supports_facts.append(f)
-                #print('--------------\n\n', rule.supports_facts)
-                #print([fact,rule], '\n\n=++++++++++++++++++++++++++++++++++++++++++++++++')
 
+            kb.kb_assert(f)
 
         elif binding and len(rule.lhs) > 1: 
             s_r = instantiate(rule.rhs, binding)
@@ -260,19 +251,8 @@ class InferenceEngine(object):
 
             # SAME LOGIC FOR RULE, BASED ON FACT
             new_rule = Rule([lhs_statements, s_r], [fact, rule])
-            """
-            if new_rule in kb.rules:
-                ind = kb.rules.index(new_rule)
-                kb.rules[ind].supported_by.append([fact,rule])
-                rule.supports_rules.append(kb.rules[ind])
-            else:
-                """
-            kb.kb_assert(new_rule)
-            #print(new_rule.lhs, new_rule.rhs, '\n\n----------------------------')
-            #print('--------------------------\n', new_rule.lhs, '\n', type(new_rule) , '-------------------')
+        
             rule.supports_rules.append(new_rule)
             fact.supports_rules.append(new_rule)
-                #print('-------------\n\n' , len(rule.supports_rules))
 
-
-
+            kb.kb_assert(new_rule)

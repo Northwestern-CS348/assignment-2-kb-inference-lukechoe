@@ -31,15 +31,9 @@ class KBTest(unittest.TestCase):
         answer = self.KB.kb_ask(ask1)
         self.assertEqual(str(answer[0]), "?X : felix")
         self.assertEqual(str(answer[1]), "?X : chen")
-    """
-        for fact in self.KB.facts:
-            print('-----------------------')
-            print(fact.statement)
-            
-        for rule in self.KB.rules:
-            print('....................')
-            print(rule.lhs[0], '------ ' , rule.rhs, '-------', rule.supported_by)
-    """
+    
+        
+    
 
 
     def test3(self):
@@ -54,6 +48,8 @@ class KBTest(unittest.TestCase):
         answer = self.KB.kb_ask(ask1)
         self.assertEqual(len(answer), 1)
         self.assertEqual(str(answer[0]), "?X : felix")
+
+
 
 
     def test4(self):
@@ -72,6 +68,15 @@ class KBTest(unittest.TestCase):
         answer = self.KB.kb_ask(ask1)
         self.assertEqual(str(answer[0]), "?X : felix")
         self.assertEqual(str(answer[1]), "?X : chen")
+        """
+        for fact in self.KB.facts:
+            print('-----------------------')
+            print(fact.statement)
+            
+        for rule in self.KB.rules:
+            print('....................')
+            print(rule.lhs[0], '------ ' , rule.rhs)
+            """
         
     def test5(self):
         # makes sure retract does not deal with rules
@@ -86,7 +91,45 @@ class KBTest(unittest.TestCase):
         answer = self.KB.kb_ask(ask1)
         self.assertEqual(str(answer[0]), "?X : bing")
 
+    def setUp(self):
+        # Assert starter facts
+        file = 'statements_kb5.txt'
+        self.data = read.read_tokenize(file)
+        data = read.read_tokenize(file)
+        self.KB = KnowledgeBase([], [])
+        for item in data:
+            if isinstance(item, Fact) or isinstance(item, Rule):
+                self.KB.kb_assert(item)
 
+    def test6(self):
+        # makes sure retract does not retract supported fact
+        ask1 = read.parse_input("fact: (cousins chen ?X)")
+        print(' Asking if', ask1)
+        answer = self.KB.kb_ask(ask1)
+        self.assertEqual(str(answer[0]), "?X : eva")
+        self.assertEqual(len(answer), 1)
+
+        ask1 = read.parse_input("fact: (auntof eva ?X)")
+        print(' Asking if', ask1)
+        answer = self.KB.kb_ask(ask1)
+        self.assertEqual(str(answer[0]), "?X : bing")
+        self.assertEqual(len(answer), 1)
+
+
+        r1 = read.parse_input("fact: (sisters ada eva)")
+        print(' Retracting', r1)
+        self.KB.kb_retract(r1)
+
+        print(' Asking if', ask1)
+        answer = self.KB.kb_ask(ask1)
+        self.assertFalse(answer)
+        self.assertEqual(len(answer), 0)
+
+        ask1 = read.parse_input("fact: (cousins chen ?X)")
+        print(' Asking if', ask1)
+        answer = self.KB.kb_ask(ask1)
+        self.assertFalse(answer)
+        self.assertEqual(len(answer), 0)
 def pprint_justification(answer):
     """Pretty prints (hence pprint) justifications for the answer.
     """
