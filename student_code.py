@@ -134,7 +134,7 @@ class KnowledgeBase(object):
         ####################################################
         # Student code goes here
 
-
+        
         if fact_or_rule in self.facts:
             ind = self.facts.index(fact_or_rule)
             f_r = self.facts[ind]
@@ -145,13 +145,16 @@ class KnowledgeBase(object):
             print("Fact/Rule not found???????")
             return
         
-        
+        """ THIS IS NECESSSAERY BUT MAYBE MAKE HELPER SO THAT IT IS
+        ONLY CALLED ON THE FIRST fact_OR_rule instead of all
         if isinstance(f_r, Rule) and len(f_r.supported_by) == 0:
             return
         if len(f_r.supported_by) > 0:
             return
+        """
 
-    
+        #print("THIS IS IMPORTANT------------", len(f_r.supports_facts))
+
         for f in f_r.supports_facts:
             
             ind3 = f.supported_by.index(f_r)
@@ -175,8 +178,8 @@ class KnowledgeBase(object):
                 
                 
         for r in f_r.supports_rules:
+
             ind3 = r.supported_by.index(f_r)
-            #print('***************************************************', r.supported_by[ind3])
             if ind3 % 2 == 1:
                 tmp = r.supported_by[ind3-1]
                 r.supported_by.remove(tmp)
@@ -189,11 +192,10 @@ class KnowledgeBase(object):
                 tmp = r.supported_by[ind3]
                 r.supported_by.remove(tmp)
 
-            print('...')
             if (len(r.supported_by)) == 0:
                 ind3 = self.rules.index(r)
                 temp = self.rules[ind3]
-                self.rules.remove(self.rules[ind3])
+                #self.rules.remove(self.rules[ind3])
                 self.kb_retract(temp)
                 
 
